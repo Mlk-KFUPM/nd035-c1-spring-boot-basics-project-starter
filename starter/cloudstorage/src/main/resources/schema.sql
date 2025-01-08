@@ -24,3 +24,13 @@ CREATE TABLE IF NOT EXISTS FILES (
     filedata BYTEA,
     foreign key (userid) references USERS(userid)
 );
+
+CREATE TABLE credentials (
+    id serial PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    website VARCHAR(255) NOT NULL,
+    userid INT NOT NULL,
+    foreign key (userid) references USERS(userid)
+);
+

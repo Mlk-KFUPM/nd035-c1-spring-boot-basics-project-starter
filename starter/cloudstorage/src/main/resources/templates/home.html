@@ -11,7 +11,7 @@
     <body class="p-3 mb-2 bg-light text-black">
         <div class="container">
             <div id="logoutDiv">
-                <form action="#" method="POST">
+                <form th:action="@{/logout}" method="POST">
                     <button type="submit" class="btn btn-secondary float-right">Logout</button>
                 </form>
             </div>
@@ -25,7 +25,7 @@
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="nav-files" role="tabpanel" aria-labelledby="nav-files-tab">
-                        <form action="#" enctype="multipart/form-data" method="POST">
+                        <form action="#" enctype="multipart/form-data"  th:action="@{/home/upload_file}" method="POST">
                             <div class="container">
                                 <div class="row" style="margin: 1em;">
                                     <div class="col-sm-2">
@@ -48,41 +48,45 @@
                                         <th style="width: 80%" scope="col">File Name</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="fileTable" th:each="file : ${files}">
                                 <tr>
                                     <td>
-                                        <a target="_blank" class="btn btn-success">View</a>
-                                        <a  class="btn btn-danger">Delete</a>
+                                        <a target="_blank" class="btn btn-success" th:href="@{/home/view_file/{fileId}(fileId=${file.fileId})}">View</a>
+                                        <a  class="btn btn-danger" th:attr="data-id=${file.fileId}" onclick="deleteFile(this)">Delete</a>
                                     </td>
-                                    <th scope="row">ExampleFile.txt</th>
+                                    <th scope="row" th:text="${file.getFilename()}">ExampleFile.txt</th>
                                 </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     <div class="tab-pane fade" id="nav-notes" role="tabpanel" aria-labelledby="nav-notes-tab">
-                        <button style="margin: 0.25em;" type="button" class="btn btn-info float-right" onclick="showNoteModal()">
-                            + Add a New Note
-                        </button>
+                        <button style="margin: 0.25em;" type="button" class="btn btn-info float-right"
+                                onclick="showNoteModal()">+ Add a New Note</button>
 
                         <div class="table-responsive">
                             <table class="table table-striped" id="userTable">
                                 <thead>
-                                    <tr>
-                                        <th style="width: 20%" scope="col"></th>
-                                        <th style="width: 20%" scope="col">Title</th>
-                                        <th style="width: 60%" scope="col">Description</th>
-                                    </tr>
+                                <tr>
+                                    <th style="width: 20%" scope="col"></th>
+                                    <th style="width: 20%" scope="col">Title</th>
+                                    <th style="width: 60%" scope="col">Description</th>
+                                </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <button type="button" class="btn btn-success">Edit</button>
-                                            <a class="btn btn-danger">Delete</a>
-                                        </td>
-                                        <th scope="row">Example Note Title</th>
-                                        <td>Example Note Description </td>
-                                    </tr>
+                                <tbody id="noteTable" th:each="note : ${notes}">
+                                <tr>
+                                    <td>
+                                        <button type="button" class="btn btn-success"
+                                                th:data-id="${note.noteId}"
+                                                th:data-title="${note.noteTitle}"
+                                                th:data-description="${note.noteDescription}"
+                                                onclick="showNoteModal(this)">Edit</button>
+
+                                        <a href="javascript:void(0);" class="btn btn-danger" th:attr="data-id=${note.noteId}" onclick="deleteNote(this)">Delete</a>
+                                    </td>
+                                    <th scope="row" th:text="${note.noteTitle}">Example Note Title</th>
+                                    <td th:text="${note.noteDescription}">Example Note Description</td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -97,7 +101,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" method="POST">
+                                        <form action="#" th:action="@{/home/create_note}" method="POST">
                                             <input type="hidden" name="noteId" id="note-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">Title</label>
@@ -124,7 +128,7 @@
                         </button>
 
                         <div class="table-responsive">
-                            <table class="table table-striped" th:object="${credentials}" id="credentialTable">
+                            <table class="table table-striped" id="credentialTable">
                                 <thead>
                                     <tr>
                                         <th style="width: 20%" scope="col"></th>
@@ -133,15 +137,19 @@
                                         <th style="width: 25%" scope="col">Password</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="credentialsTable" th:each="credential : ${credentials}">
                                 <tr>
                                     <td>
-                                        <button type="button" class="btn btn-success">Edit</button>
-                                        <a class="btn btn-danger">Delete</a>
+                                        <button type="button" class="btn btn-success"
+                                                th:data-id="${credential.id}"
+                                                th:data-url="${credential.url}"
+                                                th:data-username="${credential.username}"
+                                                onclick="showCredentialModal(this)">Edit</button>
+                                        <a class="btn btn-danger" th:attr="data-id=${credential.id}" onclick="deleteCredential(this)">Delete</a>
                                     </td>
-                                    <th scope="row">Example Credential URL</th>
-                                    <td>Example Credential Username</td>
-                                    <td>Example Credential Password</td>
+                                    <th scope="row" th:text="${credential.url}">Example Credential URL</th>
+                                    <td th:text="${credential.username}">Example Credential Username</td>
+                                    <td th:text="${credential.password}">Example Credential Password</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -157,7 +165,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" method="POST">
+                                        <form action="#" th:action="@{/home/create_credential}" method="POST">
                                             <input type="hidden" name="credentialId" id="credential-id">
                                             <div class="form-group">
                                                 <label for="credential-url" class="col-form-label">URL</label>
@@ -190,23 +198,136 @@
         <script th:src="@{/js/popper.min.js}"></script>
         <script th:src="@{/js/bootstrap.min.js}"></script>
 
+        <script>
         <!--For opening the note modal-->
-        <script type="text/javascript">
-            // For opening the note modal
-            function showNoteModal(noteId, noteTitle, noteDescription) {
-                $('#note-id').val(noteId ? noteId : '');
-                $('#note-title').val(noteTitle ? noteTitle : '');
-                $('#note-description').val(noteDescription ? noteDescription : '');
-                $('#noteModal').modal('show');
+        function showNoteModal(button = null) {
+            let noteId = '';
+            let noteTitle = '';
+            let noteDescription = '';
+
+            if (button) {
+                noteId = button.getAttribute('data-id') || '';
+                noteTitle = button.getAttribute('data-title') || '';
+                noteDescription = button.getAttribute('data-description') || '';
             }
 
-            // For opening the credentials modal
-            function showCredentialModal(credentialId, url, username, password) {
-                $('#credential-id').val(credentialId ? credentialId : '');
-                $('#credential-url').val(url ? url : '');
-                $('#credential-username').val(username ? username : '');
-                $('#credential-password').val(password ? password : '');
-                $('#credentialModal').modal('show');
+            // Populate modal fields
+            document.getElementById('note-id').value = noteId;
+            document.getElementById('note-title').value = noteTitle;
+            document.getElementById('note-description').value = noteDescription;
+
+            // Show modal
+            $('#noteModal').modal('show');
+        }
+
+        // For opening the credentials modal
+        function showCredentialModal(button = null) {
+            let credentialId = '';
+            let url = '';
+            let username = '';
+            let password = '';
+
+            if (button) {
+                credentialId = button.getAttribute('data-id') || '';
+                url = button.getAttribute('data-url') || '';
+                username = button.getAttribute('data-username') || '';
+                password = 'Loading...';
+
+                // Fetch the decrypted password
+                fetch(`/home/decrypt_password?id=${credentialId}`)
+                    .then((response) => {
+                        if (!response.ok) {
+                            console.log(response);
+                            throw new Error('Failed to fetch decrypted password');
+                        }
+                        return response.text(); // Call response.text() only once
+                    })
+                    .then((decryptedPassword) => {
+                        console.log(decryptedPassword); // Log the decrypted password
+                        document.getElementById('credential-password').value = decryptedPassword;
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching decrypted password:', error);
+                        document.getElementById('credential-password').value = 'Error loading password';
+                    });
+
+            }
+
+            document.getElementById('credential-id').value = credentialId;
+            document.getElementById('credential-url').value = url;
+            document.getElementById('credential-username').value = username;
+            document.getElementById('credential-password').value = password;
+
+            $('#credentialModal').modal('show');
+        }
+
+
+            // method for deleting file
+            async function deleteFile(element) {
+                const fileId = element.getAttribute('data-id');
+
+                try {
+                    const response = await fetch(`/home/delete_file?fileId=${fileId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                    });
+
+                    if (response.ok) {
+                        const row = element.closest('tr');
+                        if (row) row.remove();
+                    } else {
+                        console.error('Failed to delete file. Status:', response.status);
+                    }
+                } catch (error) {
+                    console.error('Error deleting file:', error);
+                }
+            }
+            // method for deleting a note
+            async function deleteNote(element) {
+                const noteId = element.getAttribute('data-id');
+
+                try {
+                    const response = await fetch(`/home/delete_note?noteId=${noteId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                    });
+
+                    if (response.ok) {
+                        const row = element.closest('tr');
+                        if (row) row.remove();
+                    } else {
+                        console.error('Failed to delete note. Status:', response.status);
+                    }
+                } catch (error) {
+                    console.error('Error deleting note:', error);
+                }
+            }
+
+            // method for deleting a note
+            async function deleteCredential(element) {
+                const credentialId = element.getAttribute('data-id');
+
+                try {
+                    const response = await fetch(`/home/delete_credential?id=${credentialId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                    });
+
+                    if (response.ok) {
+                        const row = element.closest('tr');
+                        if (row) row.remove();
+                    } else {
+                        console.error('Failed to delete credential. Status:', response.status);
+                    }
+                } catch (error) {
+                    console.error('Error deleting credential:', error);
+                }
             }
         </script>
     </body>
